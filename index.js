@@ -1,43 +1,18 @@
-const express = require('express');
-const request = require('request');
-const cheerio = require('cheerio');
+const express = require("express");
+const request = require("request");
 const app = express();
-app.get('/', function (req, res) {
-  let typ = req.query.typ;
-  let lan = req.query.lan;
-  let kommun = req.query.kommun;
+app.get("/", function (req, res) {
+  let channel = req.query.ch;
 
-  let urlTest = 'https://bensinpriser.nu/stationer/' + typ + '/' + lan + '/' + kommun + '';
+  let urlTest = "https://shashatcom.faulio.com/api/v1/channels/" + channel;
 
-
-  request(urlTest, function (error, response, html) {
-
+  request(urlTest, function (error, response) {
     if (!error) {
-
-      var $ = cheerio.load(html);
-
-      const scrapedData = [];
-      $('#price_table > tbody > tr').each((index, element) => {
-        if (index === 0) return true;
-        const tds = $(element).find('td');
-        const station = $(tds[0]).text();
-        const pris = $(tds[1]).text();
-        const tableRow = { station, pris };
-        scrapedData.push(tableRow);
-      });
-
-      var json = [{
-        lan: lan,
-        kommun: kommun,
-        typ: typ,
-        Result: scrapedData
-      }];
-      res.send(json)
-
+      var obj = JSON.parse(response.body);
+      res.redirect(obj.streams.hls)
     }
-
   });
-
 });
+// app.listen("8080");
 app.listen(process.env.PORT || 5000);
 module.exports = app;
